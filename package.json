@@ -1,0 +1,17 @@
+{
+  "name": "graphql-internationalizion-schema-demo",
+  "version": "0.0.1",
+  "scripts": {
+    "start": "ts-node-dev --no-notify --transpileOnly --respawn ./src"
+  },
+  "dependencies": {
+    "apollo-server": "^2.4.8",
+    "graphql": "^14.1.1",
+    "nexus": "^0.11.5"
+  },
+  "devDependencies": {
+    "@types/node": "^11.11.6",
+    "ts-node-dev": "^1.0.0-pre.30",
+    "typescript": "^3.1.6"
+  }
+}
