@@ -20,6 +20,11 @@ type Article {
 
 type Author {
   articles: [Article]
+  bio: String
+  bio_de: String
+  bio_en: String
+  bio_es: String
+  bio_translations: [String]!
   id: Int!
   name: String
 }
@@ -38,6 +43,6 @@ type FurtherReading {
 }
 
 type Query {
-  article(id: Int!, lang: String): Article
-  author(id: Int!, lang: String): Author
+  article(id: Int!, lang: String, strict: Boolean): Article
+  author(id: Int!, lang: String, strict: Boolean): Author
 }

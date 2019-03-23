@@ -1,43 +1,138 @@
-<h1 align="center"><strong>Boilerplate for a Minimal GraphQL Server</strong></h1>
+## GraphQL Internationalization demo
 
-<br />
+Just a way to explore what a schema of translated content could look like.
 
-<div align="center"><strong>🚀 Bootstrap your GraphQL server within seconds</strong></div>
-<div align="center">Basic starter kit for a flexible GraphQL server for Node.js - based on best practices from the GraphQL community.</div>
+Playground: https://lang-demo.good-idea.now.sh/
 
-## Features
+_**Note:** This implementation could be a start but is a very rough draft. For instance, it mutates the GraphQL context in a nasty way as different languages are queried._
 
-- **Scalable GraphQL server:** The server uses [`graphql-yoga`](https://github.com/prisma/graphql-yoga) which is based on Apollo Server & Express
+### Features:
 
-- **Simple Hello World example:** Where it either returns `Hello <name>!` or `Hello World!` if no name argument is provided.
-  
-## Getting started
+**Generate translated fields based on available translations.**
 
-```sh
-# 1. Navigate to the folder
-# 2. Run yarn install or npm install
-# 3. Start server using yarn run start or npm start (runs on http://localhost:4000) and open in GraphQL Playground
+```graphql
+type Article {
+	author: Author!
+	title: String!
+}
 ```
-![alt text](https://i.imgur.com/yjkt0mQ.png) ![alt text](https://i.imgur.com/Ym06T2Y.png)
 
-## Documentation
+becomes 👇
 
-### Commands
+```graphql
+type Article {
+	author: Author!
+	title: String! # 👉 Falls back to current language
+	title_en: String
+	title_es: String
+	title_translations: [String]! # 👉 '['en', 'es']
+}
+```
 
-* `yarn start` or `npm run start` starts GraphQL server on `http://localhost:4000`
+**Provide a `lang: 'es'` argument on a scalar to set the language or all child nodes**
 
-### Project structure
+```graphql
+query {
+   Article(lang: 'es') {
+      title	# 👉 'Cómo localicé mi esquema GraphQL'
+      author {
+         bio # 👉 'Joseph vive en Los Angeles'
+      }
+   }
+}
+```
 
-![](https://i.imgur.com/uD2fqZo.png)
+_No language (falls back to defaults):_
 
-| File name 　　　　　　　　　　　　　　| Description 　　　　　　　　<br><br>| 
-| :--  | :--         |
-| `└── src ` (_directory_) | _Contains the source files for your GraphQL server_ |
-| `　　├── index.js` | The entry point for your GraphQL server |
+```graphql
+query {
+	Article {
+		title # 👉 'How I localized my GraphQL Schema'
+		author {
+			bio # 👉 'Joseph lives in Los Angeles'
+		}
+	}
+}
+```
 
+**Fields fall back to default (or parent) language**
 
-## Contributing
+```graphql
+query {
+   Article(lang: 'de') {
+      title: # 👉 'How I localized my GraphQL Schema'
+   }
+}
+```
 
-The GraphQL boilerplates are maintained by the GraphQL community, with official support from the [Apollo](https://dev-blog.apollodata.com) & [Graphcool](https://blog.graph.cool/) teams.
+**Or, Provide a `strict: true` argument on a scalar to prevent resolving to the default translation:**
 
-Your feedback is **very helpful**, please share your opinion and thoughts! If you have any questions or want to contribute yourself, join the [`#graphql-boilerplate`](https://graphcool.slack.com/messages/graphql-boilerplate) channel on our [Slack](https://graphcool.slack.com/).
+```graphql
+query {
+   Article(lang: 'de', strict: true) {
+      title:  # 👉 null
+   }
+}
+```
+
+---
+
+A full query that demonstrates all of the above:
+
+```graphql
+{
+	article(id: 1) {
+		title
+
+		# Available translations
+		title_translations
+
+		# Specific translations
+		title_en
+		title_es
+		title_de
+
+		author {
+			name
+			bio
+		}
+
+		furtherReading {
+			title
+			url
+		}
+
+		# Querying for a different language on scalars
+		furtherReadingES: furtherReading(lang: "es", strict: true) {
+			title
+			url
+		}
+	}
+
+	articleES: article(id: 1, lang: "es") {
+		title
+
+		# Uses parent language ("es")
+		author {
+			name
+			bio
+		}
+
+		# Uses parent language ("es")
+		furtherReading {
+			title
+			url
+		}
+	}
+
+	# Non-strict, title will return with English translation
+	articleDE: article(id: 1, lang: "de") {
+		title
+	}
+
+	# Strict, title will return `null`
+	articleDEStrict: article(id: 1, lang: "de", strict: true) {
+		title
+	}
+}
+```

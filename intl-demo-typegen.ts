@@ -51,6 +51,11 @@ export interface NexusGenFieldTypes {
   }
   Author: { // field return type
     articles: Array<NexusGenRootTypes['Article'] | null> | null; // [Article]
+    bio: string | null; // String
+    bio_de: string | null; // String
+    bio_en: string | null; // String
+    bio_es: string | null; // String
+    bio_translations: Array<string | null>; // [String]!
     id: number; // Int!
     name: string | null; // String
   }
@@ -83,10 +88,12 @@ export interface NexusGenArgTypes {
     article: { // args
       id: number; // Int!
       lang?: string | null; // String
+      strict?: boolean | null; // Boolean
     }
     author: { // args
       id: number; // Int!
       lang?: string | null; // String
+      strict?: boolean | null; // Boolean
     }
   }
 }
